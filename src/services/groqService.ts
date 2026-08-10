@@ -77,9 +77,20 @@ async function callGroq(
 
     const errorText = await response.text();
     const status = response.status;
-    lastError = new Error(
-      `Groq API error (${status}): ${errorText.slice(0, 200)}`
-    );
+    const isModelNotFound =
+      errorText.includes("model_not_found") ||
+      errorText.includes("does not exist or you do not have access");
+
+    if (isModelNotFound) {
+      lastError = new Error(
+        "Your Groq API key does not have access to a receipt image model. " +
+          "Please use a key with vision model access (e.g. meta-llama/llama-4-scout or llava-v1.5-7b-4096-preview)."
+      );
+    } else {
+      lastError = new Error(
+        `Groq API error (${status}): ${errorText.slice(0, 200)}`
+      );
+    }
 
     // Only retry on 429 (rate limit) or 5xx (server error)
     const isRetryable = status === 429 || (status >= 500 && status < 600);
