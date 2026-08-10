@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { fileToBase64, extractReceiptItems } from "../services/receiptService";
 import type { ReceiptItem } from "../types/receipt";
 
@@ -15,8 +15,6 @@ export function ReceiptCapture({
   onCancel,
   onBack,
 }: ReceiptCaptureProps) {
-  const cameraInputRef = useRef<HTMLInputElement>(null);
-  const galleryInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -141,33 +139,33 @@ export function ReceiptCapture({
 
       {/* Controls */}
       <div className="p-4 bg-black/80 space-y-3">
-        <button
-          onClick={() => cameraInputRef.current?.click()}
-          className="w-full bg-pantry-600 hover:bg-pantry-700 text-white font-semibold py-4 rounded-xl transition-colors flex items-center justify-center gap-2"
+        <label
+          htmlFor="receipt-camera"
+          className="w-full bg-pantry-600 hover:bg-pantry-700 text-white font-semibold py-4 rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer"
         >
           📷 Take Photo
-        </button>
-        <button
-          onClick={() => galleryInputRef.current?.click()}
-          className="w-full bg-white/10 hover:bg-white/20 text-white font-semibold py-4 rounded-xl transition-colors flex items-center justify-center gap-2"
+        </label>
+        <label
+          htmlFor="receipt-gallery"
+          className="w-full bg-white/10 hover:bg-white/20 text-white font-semibold py-4 rounded-xl transition-colors flex items-center justify-center gap-2 cursor-pointer"
         >
           🖼️ Upload Receipt
-        </button>
+        </label>
 
         <input
-          ref={cameraInputRef}
+          id="receipt-camera"
           type="file"
           accept="image/*"
           capture="environment"
           onChange={handleFileChange}
-          className="absolute -z-10 opacity-0 w-0 h-0 p-0 m-0 border-0 overflow-hidden"
+          className="hidden"
         />
         <input
-          ref={galleryInputRef}
+          id="receipt-gallery"
           type="file"
           accept="image/*"
           onChange={handleFileChange}
-          className="absolute -z-10 opacity-0 w-0 h-0 p-0 m-0 border-0 overflow-hidden"
+          className="hidden"
         />
       </div>
     </div>
