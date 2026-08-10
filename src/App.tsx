@@ -5,7 +5,6 @@ import type { Ingredient } from "./types/ingredient";
 import type { Recipe, CourseType } from "./types/recipe";
 import { COURSE_OPTIONS } from "./types/recipe";
 import type { ReceiptItem } from "./types/receipt";
-import { BarcodeScanner } from "./components/BarcodeScanner";
 import { ReceiptCapture } from "./components/ReceiptCapture";
 import { ReceiptConfirmation } from "./components/ReceiptConfirmation";
 import { IngredientList } from "./components/IngredientList";
@@ -18,7 +17,7 @@ import { LoadingState } from "./components/LoadingState";
 import { EmptyState } from "./components/EmptyState";
 import { useFavorites } from "./hooks/useFavorites";
 
-type ScanStep = "idle" | "barcode" | "capture" | "confirm";
+type ScanStep = "idle" | "capture" | "confirm";
 
 const COURSE_LABELS: Record<CourseType, string> = {
   Any: "🍴 Anything",
@@ -49,7 +48,6 @@ function App() {
   } = useRecipes(ingredients, version, course);
 
   const [scanStep, setScanStep] = useState<ScanStep>("idle");
-  const [barcode, setBarcode] = useState<string | null>(null);
   const [receiptItems, setReceiptItems] = useState<ReceiptItem[]>([]);
   const [showIngredientForm, setShowIngredientForm] = useState(false);
   const [editingIngredient, setEditingIngredient] = useState<Ingredient | null>(
@@ -91,18 +89,7 @@ function App() {
   );
 
   const handleScanStart = useCallback(() => {
-    setBarcode(null);
     setReceiptItems([]);
-    setScanStep("barcode");
-  }, []);
-
-  const handleBarcodeDetected = useCallback((code: string) => {
-    setBarcode(code);
-    setScanStep("capture");
-  }, []);
-
-  const handleBarcodeSkip = useCallback(() => {
-    setBarcode(null);
     setScanStep("capture");
   }, []);
 
@@ -123,7 +110,6 @@ function App() {
 
   const handleScanCancel = useCallback(() => {
     setScanStep("idle");
-    setBarcode(null);
     setReceiptItems([]);
   }, []);
 
@@ -396,20 +382,11 @@ function App() {
       </main>
 
       {/* Scan flow overlays */}
-      {scanStep === "barcode" && (
-        <BarcodeScanner
-          onDetected={handleBarcodeDetected}
-          onCancel={handleScanCancel}
-          onSkip={handleBarcodeSkip}
-        />
-      )}
-
       {scanStep === "capture" && (
         <ReceiptCapture
-          barcode={barcode}
           onExtracted={handleReceiptExtracted}
           onCancel={handleScanCancel}
-          onBack={() => setScanStep("barcode")}
+          onBack={handleScanCancel}
         />
       )}
 

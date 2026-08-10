@@ -3,14 +3,12 @@ import { fileToBase64, extractReceiptItems } from "../services/receiptService";
 import type { ReceiptItem } from "../types/receipt";
 
 interface ReceiptCaptureProps {
-  barcode: string | null;
   onExtracted: (items: ReceiptItem[]) => void;
   onCancel: () => void;
   onBack: () => void;
 }
 
 export function ReceiptCapture({
-  barcode,
   onExtracted,
   onCancel,
   onBack,
@@ -99,14 +97,6 @@ export function ReceiptCapture({
           ✕
         </button>
       </div>
-
-      {barcode && (
-        <div className="bg-pantry-600/20 border border-pantry-600/30 px-4 py-2 text-center">
-          <p className="text-pantry-300 text-sm">
-            ✓ Barcode detected: <span className="font-mono font-bold">{barcode}</span>
-          </p>
-        </div>
-      )}
 
       {/* Content */}
       <div className="flex-1 relative overflow-hidden">
