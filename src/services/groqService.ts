@@ -11,7 +11,7 @@ const COURSE_GUIDANCE: Record<Exclude<CourseType, "Any">, string> = {
     "Desserts are sweet dishes served after the meal, such as puddings, halwa, kheer, cakes, or sweet snacks. They must be sweet, not savoury.",
 };
 
-const VISION_MODEL = "llava-v1.5-7b-4096-preview";
+const VISION_MODEL = "qwen/qwen3.6-27b";
 const TEXT_MODEL = "openai/gpt-oss-120b";
 
 const API_KEY_STORAGE_KEY = "spicebox-groq-api-key";
@@ -124,61 +124,23 @@ export async function extractReceiptImage(
   imageBase64: string,
   mimeType: string
 ): Promise<string> {
-  const systemPrompt = `You are a grocery receipt parsing assistant. Analyze the supplied receipt image and extract every grocery/food item purchased.
+  const systemPrompt = `You are a grocery receipt parser. Extract only food/grocery items from the receipt image.
 
-Return ONLY valid JSON, no markdown, no code fences, no explanation. Use this exact shape:
+Return ONLY valid JSON in this exact shape, no markdown, no explanation:
 
 {
   "items": [
-    {
-      "name": "string",
-      "quantity": number|null,
-      "unit": "string|null",
-      "price": number|null
-    }
+    {"name": "string", "quantity": number|null, "unit": "string|null", "price": number|null}
   ]
 }
 
-Instructions:
-- The receipt may have columns such as HSN, ITEM, QTY, RATE, DISCOUNT, AMOUNT. Ignore HSN codes, store headers, taxes, discounts, payment info, invoice numbers, and loyalty info.
-- Extract only food/grocery items from the ITEM column.
-- Normalize item names into common, clean food names (Title Case, singular common form). Remove brand names when they are just packaging labels.
-- For quantity, use the number in the QTY/Quantity column if clearly visible. If the unit is unclear, use null.
-- For unit, infer from the receipt if shown (kg, g, ml, l, pcs, pack, bunch, etc.), otherwise null.
-- For price, use the final amount/AMOUNT column if clearly visible, otherwise null.
-- Do not invent items. Skip non-food rows such as "PLASTIC BAG", "SHOPPING BAG", "LOYALTY POINTS", "GIFT CARD", or tax/discount lines.
-
-Normalization examples:
-- "DRUMSTICK" -> "Drumstick"
-- "CAULIFLOWER" -> "Cauliflower"
-- "YARD LONG BEAN" -> "Yard Long Bean"
-- "SPRING ONION" -> "Spring Onion"
-- "TOMATO COUNTRY" -> "Tomato"
-- "GUAVA PREPACK" -> "Guava"
-- "BEET ROOT" -> "Beetroot"
-- "CABBAGE ROUND HEAD" -> "Cabbage"
-- "APIS ROYAL ZAIDI DA" -> "Dates"
-- "BROCCOLI" -> "Broccoli"
-- "CUCUMBER GREEN" -> "Cucumber"
-- "PUDINA" -> "Mint"
-- "MUSHROOM BUTTON" -> "Mushroom"
-- "MILKY MIST GHEE POUCH" -> "Ghee"
-- "SAPTA FOODS RTC CHAP" -> "Chapati"
-- "SPAR FRESH GRAPES" -> "Grapes"
-- "APPLE PINK LADY" -> "Apple"
-- "POPULAR RAISIN BOGO" -> "Raisins"
-- "GRAHINI RASAM POWDER" -> "Rasam Powder"
-- "PUMPKIN SWEET" -> "Pumpkin"
-- "CARROT KOLAR" -> "Carrot"
-- "ORANGE MINI IMPORTED" -> "Orange"
-- "COCONUT" -> "Coconut"
-- "BHENDI" -> "Okra"
-- "CUCUMBER MALABAR" -> "Cucumber"
-- "CAPSICUM GREEN" -> "Capsicum"
-- "SWEET POTATO" -> "Sweet Potato"
-- "CHILLY GREEN LONG" -> "Green Chilli"
-
-If the image is not a grocery receipt, return {"items": []}.`;
+Rules:
+- Ignore columns like HSN, store headers, taxes, discounts, payment, invoice, loyalty, and barcode numbers.
+- Extract items from the ITEM/PRODUCT column.
+- Normalize names to common clean food names. Example: "BHENDI" -> "Okra", "TOMATO COUNTRY" -> "Tomato", "SPAR FRESH GRAPES" -> "Grapes", "APPLE PINK LADY" -> "Apple", "MILKY MIST GHEE POUCH" -> "Ghee", "PUDINA" -> "Mint", "CHILLY GREEN LONG" -> "Green Chilli".
+- Use the QTY column for quantity and the AMOUNT column for price. If unclear, use null.
+- Skip non-food lines like "PLASTIC BAG" or "LOYALTY".
+- If the image is not a grocery receipt, return {"items": []}.`;
 
   const messages: GroqMessage[] = [
     { role: "system", content: systemPrompt },
@@ -200,7 +162,7 @@ If the image is not a grocery receipt, return {"items": []}.`;
   return callGroq(messages, {
     model: VISION_MODEL,
     temperature: 0.1,
-    max_tokens: 4096,
+    max_tokens: 1024,
     response_format: { type: "json_object" },
   });
 }
