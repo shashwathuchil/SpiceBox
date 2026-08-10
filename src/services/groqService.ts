@@ -14,8 +14,10 @@ const COURSE_GUIDANCE: Record<Exclude<CourseType, "Any">, string> = {
 const VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
 const TEXT_MODEL = "openai/gpt-oss-120b";
 
+const API_KEY_STORAGE_KEY = "spicebox-groq-api-key";
+
 function getApiKey(): string {
-  return import.meta.env.VITE_GROQ_API_KEY || "";
+  return localStorage.getItem(API_KEY_STORAGE_KEY) || "";
 }
 
 export function hasApiKey(): boolean {
@@ -42,7 +44,7 @@ async function callGroq(
   const apiKey = getApiKey();
   if (!apiKey) {
     throw new Error(
-      "Groq API key is not configured. Set VITE_GROQ_API_KEY in your .env file."
+      "Groq API key is not configured. Enter it in Settings or set it in localStorage under 'spicebox-groq-api-key'."
     );
   }
 

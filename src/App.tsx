@@ -13,6 +13,7 @@ import { IngredientForm } from "./components/IngredientForm";
 import { RecipeGrid } from "./components/RecipeGrid";
 import { RecipeModal } from "./components/RecipeModal";
 import { Sidebar } from "./components/Sidebar";
+import { Settings } from "./components/Settings";
 import { LoadingState } from "./components/LoadingState";
 import { EmptyState } from "./components/EmptyState";
 import { useFavorites } from "./hooks/useFavorites";
@@ -56,7 +57,7 @@ function App() {
   );
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-  const [view, setView] = useState<"home" | "saved">("home");
+  const [view, setView] = useState<"home" | "saved" | "settings">("home");
 
   const { saved, isFavorite, toggleFavorite } = useFavorites();
 
@@ -224,6 +225,8 @@ function App() {
               </div>
             )}
           </section>
+        ) : view === "settings" ? (
+          <Settings />
         ) : ingredients.length === 0 ? (
           <EmptyState onScan={handleScanStart} onAdd={() => setShowIngredientForm(true)} />
         ) : (

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-type View = "home" | "saved";
+type View = "home" | "saved" | "settings";
 
 interface SidebarProps {
   active: View;
@@ -18,6 +18,7 @@ interface NavItem {
 const ITEMS: NavItem[] = [
   { id: "home", label: "Home", icon: "🏠" },
   { id: "saved", label: "Saved Recipes", icon: "❤️" },
+  { id: "settings", label: "Settings", icon: "⚙️" },
 ];
 
 export function Sidebar({ active, onChange, savedCount }: SidebarProps) {

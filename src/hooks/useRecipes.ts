@@ -40,7 +40,7 @@ export function useRecipes(
       if (!hasApiKey()) {
         setLoading(false);
         setError(
-          "Groq API key is not configured. Set VITE_GROQ_API_KEY in your .env file."
+          "Groq API key is not configured. Enter it in Settings or set it in localStorage under 'spicebox-groq-api-key'."
         );
         return;
       }
