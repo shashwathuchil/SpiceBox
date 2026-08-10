@@ -160,14 +160,14 @@ export function ReceiptCapture({
           accept="image/*"
           capture="environment"
           onChange={handleFileChange}
-          className="hidden"
+          className="absolute -z-10 opacity-0 w-0 h-0 p-0 m-0 border-0 overflow-hidden"
         />
         <input
           ref={galleryInputRef}
           type="file"
           accept="image/*"
           onChange={handleFileChange}
-          className="hidden"
+          className="absolute -z-10 opacity-0 w-0 h-0 p-0 m-0 border-0 overflow-hidden"
         />
       </div>
     </div>
