@@ -11,7 +11,7 @@ const COURSE_GUIDANCE: Record<Exclude<CourseType, "Any">, string> = {
     "Desserts are sweet dishes served after the meal, such as puddings, halwa, kheer, cakes, or sweet snacks. They must be sweet, not savoury.",
 };
 
-const VISION_MODEL = "meta-llama/llama-4-scout-17b-16e-instruct";
+const VISION_MODEL = "qwen/qwen3.6-27b";
 const TEXT_MODEL = "openai/gpt-oss-120b";
 
 const API_KEY_STORAGE_KEY = "spicebox-groq-api-key";
