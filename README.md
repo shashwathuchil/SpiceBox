@@ -1,4 +1,4 @@
-# Smart Pantry
+# SpiceBoxAi
 
 A modern, mobile-first web application that scans grocery receipts, extracts ingredients using AI, stores them in browser Local Storage, and recommends recipes based on what you have.
 

@@ -29,7 +29,7 @@ export function Sidebar({ active, onChange, savedCount }: SidebarProps) {
           <div className="w-8 h-8 bg-gradient-to-br from-pantry-400 to-pantry-600 rounded-lg flex items-center justify-center text-white text-sm shadow-sm">
             🧺
           </div>
-          <span className="font-bold text-gray-800 text-sm">Smart Pantry</span>
+          <span className="font-bold text-gray-800 text-sm">SpiceBoxAi</span>
         </div>
         <nav className="space-y-1">
           {ITEMS.map((item) => {

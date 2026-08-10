@@ -170,7 +170,7 @@ function App() {
             </div>
             <div>
               <h1 className="font-bold text-gray-800 text-base leading-tight">
-                Smart Pantry
+                SpiceBoxAi
               </h1>
               <p className="text-[11px] text-gray-400 leading-tight">
                 Your ingredients → Your recipes
