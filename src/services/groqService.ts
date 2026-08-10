@@ -163,7 +163,6 @@ Rules:
     model: VISION_MODEL,
     temperature: 0.1,
     max_tokens: 1024,
-    response_format: { type: "json_object" },
   });
 }
 
