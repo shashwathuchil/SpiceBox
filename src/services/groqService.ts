@@ -39,7 +39,12 @@ const INITIAL_BACKOFF_MS = 2000;
 
 async function callGroq(
   messages: GroqMessage[],
-  options?: { temperature?: number; max_tokens?: number; model?: string }
+  options?: {
+    temperature?: number;
+    max_tokens?: number;
+    model?: string;
+    response_format?: { type: "json_object" };
+  }
 ): Promise<string> {
   const apiKey = getApiKey();
   if (!apiKey) {
@@ -63,6 +68,7 @@ async function callGroq(
         messages,
         temperature: options?.temperature ?? 0.3,
         max_tokens: options?.max_tokens ?? 4096,
+        ...(options?.response_format ? { response_format: options.response_format } : {}),
       }),
     });
 
@@ -118,43 +124,9 @@ export async function extractReceiptImage(
   imageBase64: string,
   mimeType: string
 ): Promise<string> {
-  const systemPrompt = `You are a grocery receipt parsing assistant.
+  const systemPrompt = `You are a grocery receipt parsing assistant. Analyze the supplied receipt image and extract every grocery/food item purchased.
 
-Analyze the supplied receipt image.
-
-Extract every grocery/food ingredient purchased.
-
-Return ONLY valid JSON. No markdown, no code fences, no explanation.
-
-For every item identify:
-
-- normalized ingredient name
-- quantity
-- unit
-- price if clearly visible
-
-Normalize names into common food names.
-
-Examples:
-
-"CAULIFLOWER" -> "Cauliflower"
-"SPRING ONION" -> "Spring Onion"
-"GREEN CHILLY" -> "Green Chilli"
-
-Do not invent items.
-
-If the quantity is unclear, use null.
-
-Ignore:
-- taxes
-- discounts
-- payment information
-- invoice numbers
-- barcode numbers
-- store information
-- loyalty information
-
-Return:
+Return ONLY valid JSON, no markdown, no code fences, no explanation. Use this exact shape:
 
 {
   "items": [
@@ -165,7 +137,48 @@ Return:
       "price": number|null
     }
   ]
-}`;
+}
+
+Instructions:
+- The receipt may have columns such as HSN, ITEM, QTY, RATE, DISCOUNT, AMOUNT. Ignore HSN codes, store headers, taxes, discounts, payment info, invoice numbers, and loyalty info.
+- Extract only food/grocery items from the ITEM column.
+- Normalize item names into common, clean food names (Title Case, singular common form). Remove brand names when they are just packaging labels.
+- For quantity, use the number in the QTY/Quantity column if clearly visible. If the unit is unclear, use null.
+- For unit, infer from the receipt if shown (kg, g, ml, l, pcs, pack, bunch, etc.), otherwise null.
+- For price, use the final amount/AMOUNT column if clearly visible, otherwise null.
+- Do not invent items. Skip non-food rows such as "PLASTIC BAG", "SHOPPING BAG", "LOYALTY POINTS", "GIFT CARD", or tax/discount lines.
+
+Normalization examples:
+- "DRUMSTICK" -> "Drumstick"
+- "CAULIFLOWER" -> "Cauliflower"
+- "YARD LONG BEAN" -> "Yard Long Bean"
+- "SPRING ONION" -> "Spring Onion"
+- "TOMATO COUNTRY" -> "Tomato"
+- "GUAVA PREPACK" -> "Guava"
+- "BEET ROOT" -> "Beetroot"
+- "CABBAGE ROUND HEAD" -> "Cabbage"
+- "APIS ROYAL ZAIDI DA" -> "Dates"
+- "BROCCOLI" -> "Broccoli"
+- "CUCUMBER GREEN" -> "Cucumber"
+- "PUDINA" -> "Mint"
+- "MUSHROOM BUTTON" -> "Mushroom"
+- "MILKY MIST GHEE POUCH" -> "Ghee"
+- "SAPTA FOODS RTC CHAP" -> "Chapati"
+- "SPAR FRESH GRAPES" -> "Grapes"
+- "APPLE PINK LADY" -> "Apple"
+- "POPULAR RAISIN BOGO" -> "Raisins"
+- "GRAHINI RASAM POWDER" -> "Rasam Powder"
+- "PUMPKIN SWEET" -> "Pumpkin"
+- "CARROT KOLAR" -> "Carrot"
+- "ORANGE MINI IMPORTED" -> "Orange"
+- "COCONUT" -> "Coconut"
+- "BHENDI" -> "Okra"
+- "CUCUMBER MALABAR" -> "Cucumber"
+- "CAPSICUM GREEN" -> "Capsicum"
+- "SWEET POTATO" -> "Sweet Potato"
+- "CHILLY GREEN LONG" -> "Green Chilli"
+
+If the image is not a grocery receipt, return {"items": []}.`;
 
   const messages: GroqMessage[] = [
     { role: "system", content: systemPrompt },
@@ -188,6 +201,7 @@ Return:
     model: VISION_MODEL,
     temperature: 0.1,
     max_tokens: 4096,
+    response_format: { type: "json_object" },
   });
 }
 
